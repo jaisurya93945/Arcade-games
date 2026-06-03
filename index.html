@@ -2,347 +2,67 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retro Arcade</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cipher Arcade - 10 Games</title>
 <style>
-body{
-    margin:0;
-    background:#111;
-    color:white;
-    font-family:Arial;
-    text-align:center;
-}
-
-h1{
-    background:#222;
-    margin:0;
-    padding:20px;
-}
-
-.menu{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:10px;
-    padding:20px;
-}
-
-button{
-    padding:10px 20px;
-    cursor:pointer;
-    border:none;
-    border-radius:8px;
-}
-
-.game{
-    display:none;
-    padding:20px;
-}
-
-.active{
-    display:block;
-}
-
-/* TicTacToe */
-.board{
-    width:300px;
-    margin:auto;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-}
-
-.cell{
-    width:100px;
-    height:100px;
-    border:1px solid white;
-    font-size:40px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-}
-
-/* Memory */
-.memory-board{
-    display:grid;
-    grid-template-columns:repeat(4,80px);
-    gap:10px;
-    justify-content:center;
-}
-
-.card{
-    width:80px;
-    height:80px;
-    background:#444;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:30px;
-    cursor:pointer;
-}
+body{font-family:Arial;margin:0;background:#111;color:#fff;text-align:center}
+header{padding:15px;background:#1b1b1b}
+#menu{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px}
+button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+.game{display:none;padding:15px}
+.active{display:block}
+canvas{background:#000;border:1px solid #555}
+.grid{display:grid;grid-template-columns:repeat(3,80px);justify-content:center}
+.cell{width:80px;height:80px;border:1px solid #fff;font-size:40px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 </style>
 </head>
-
 <body>
-
-<h1>🎮 Retro Arcade</h1>
-
-<div class="menu">
-<button onclick="showGame('tic')">Tic Tac Toe</button>
-<button onclick="showGame('rps')">Rock Paper Scissors</button>
-<button onclick="showGame('guess')">Guess Number</button>
-<button onclick="showGame('memory')">Memory Match</button>
-</div>
-
-<!-- TIC TAC TOE -->
-<div id="tic" class="game active">
-<h2>Tic Tac Toe</h2>
-
-<div class="board" id="board"></div>
-
-<p id="status"></p>
-<button onclick="resetTic()">Reset</button>
-</div>
-
-<!-- RPS -->
-<div id="rps" class="game">
-<h2>Rock Paper Scissors</h2>
-
-<button onclick="playRPS('Rock')">Rock</button>
-<button onclick="playRPS('Paper')">Paper</button>
-<button onclick="playRPS('Scissors')">Scissors</button>
-
-<p id="rpsResult"></p>
-</div>
-
-<!-- GUESS -->
-<div id="guess" class="game">
-<h2>Guess Number (1-100)</h2>
-
-<input id="guessInput" type="number">
-<button onclick="guessNumber()">Guess</button>
-
-<p id="guessResult"></p>
-</div>
-
-<!-- MEMORY -->
-<div id="memory" class="game">
-<h2>Memory Match</h2>
-
-<div class="memory-board" id="memoryBoard"></div>
-</div>
-
+<header><h1>🎮 Cipher Arcade - 10 Mini Games</h1></header>
+<div id="menu"></div>
+<div id="games"></div>
 <script>
-
-function showGame(id){
-document.querySelectorAll('.game')
-.forEach(g=>g.classList.remove('active'));
-
-document.getElementById(id)
-.classList.add('active');
-}
-
-/* TIC TAC TOE */
-
-let current='X';
-
-let boardState=['','','','','','','','',''];
-
-const wins=[
-[0,1,2],
-[3,4,5],
-[6,7,8],
-[0,3,6],
-[1,4,7],
-[2,5,8],
-[0,4,8],
-[2,4,6]
-];
-
-const board=document.getElementById('board');
-
-function renderBoard(){
-
-board.innerHTML='';
-
-boardState.forEach((cell,index)=>{
-
-const div=document.createElement('div');
-
-div.className='cell';
-
-div.innerText=cell;
-
-div.onclick=()=>move(index);
-
-board.appendChild(div);
-
-});
-}
-
-function move(i){
-
-if(boardState[i]) return;
-
-boardState[i]=current;
-
-for(let w of wins){
-
-let [a,b,c]=w;
-
-if(
-boardState[a] &&
-boardState[a]===boardState[b] &&
-boardState[a]===boardState[c]
-){
-document.getElementById('status')
-.innerText=current+" Wins!";
-renderBoard();
-return;
-}
-}
-
-current=current==='X'?'O':'X';
-
-renderBoard();
-}
-
-function resetTic(){
-
-boardState=['','','','','','','','',''];
-
-current='X';
-
-document.getElementById('status').innerText='';
-
-renderBoard();
-}
-
-renderBoard();
-
-/* RPS */
-
-function playRPS(player){
-
-const choices=['Rock','Paper','Scissors'];
-
-const cpu=
-choices[Math.floor(Math.random()*3)];
-
-let result='';
-
-if(player===cpu)
-result='Draw';
-
-else if(
-(player==='Rock'&&cpu==='Scissors')||
-(player==='Paper'&&cpu==='Rock')||
-(player==='Scissors'&&cpu==='Paper')
-)
-result='You Win';
-
-else
-result='CPU Wins';
-
-document.getElementById('rpsResult')
-.innerText=
-`You: ${player}
-CPU: ${cpu}
-${result}`;
-}
-
-/* GUESS */
-
-let secret=
-Math.floor(Math.random()*100)+1;
-
-function guessNumber(){
-
-let val=
-parseInt(
-document.getElementById('guessInput').value
-);
-
-if(val===secret)
-document.getElementById('guessResult')
-.innerText='Correct!';
-
-else if(val<secret)
-document.getElementById('guessResult')
-.innerText='Too Low';
-
-else
-document.getElementById('guessResult')
-.innerText='Too High';
-}
-
-/* MEMORY */
-
-const emojis=['🍎','🍎','🍌','🍌','🍇','🍇','🍉','🍉'];
-
-emojis.sort(()=>Math.random()-0.5);
-
-let first=null;
-let second=null;
-
-function createMemory(){
-
-const board=
-document.getElementById('memoryBoard');
-
-board.innerHTML='';
-
-emojis.forEach((emoji,index)=>{
-
-const card=
-document.createElement('div');
-
-card.className='card';
-
-card.dataset.value=emoji;
-
-card.innerText='?';
-
-card.onclick=()=>flip(card);
-
-board.appendChild(card);
-
-});
-}
-
-function flip(card){
-
-if(card.innerText!=='?') return;
-
-card.innerText=card.dataset.value;
-
-if(!first){
-first=card;
-return;
-}
-
-second=card;
-
-if(first.dataset.value!==second.dataset.value){
-
-setTimeout(()=>{
-first.innerText='?';
-second.innerText='?';
-first=null;
-second=null;
-},600);
-
-}else{
-
-first=null;
-second=null;
-}
-}
-
-createMemory();
-
+const games=["TicTacToe","RPS","Guess","Memory","Snake","Pong","Breakout","Whack","Reaction","Dice"];
+const menu=document.getElementById("menu"), area=document.getElementById("games");
+games.forEach(g=>{let b=document.createElement("button");b.innerText=g;b.onclick=()=>show(g);menu.appendChild(b);});
+function add(id,html){let d=document.createElement("div");d.className="game";d.id=id;d.innerHTML=html;area.appendChild(d);}
+function show(id){document.querySelectorAll(".game").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");}
+add("TicTacToe",'<h2>Tic Tac Toe</h2><div id="ttt" class="grid"></div><p id="tttr"></p>');
+let s=Array(9).fill(""),p="X"; const t=document.getElementById("ttt");
+function draw(){t.innerHTML="";s.forEach((v,i)=>{let c=document.createElement("div");c.className="cell";c.innerText=v;c.onclick=()=>{if(!s[i]){s[i]=p;p=p=="X"?"O":"X";draw();}};t.appendChild(c);});}
+draw();
+
+add("RPS",'<h2>Rock Paper Scissors</h2><button onclick="rps(0)">Rock</button><button onclick="rps(1)">Paper</button><button onclick="rps(2)">Scissors</button><p id="rpsr"></p>');
+window.rps=(x)=>{let c=Math.floor(Math.random()*3);document.getElementById("rpsr").innerText="CPU="+["Rock","Paper","Scissors"][c];};
+
+add("Guess",'<h2>Guess 1-100</h2><input id="gv"><button onclick="guess()">Go</button><p id="gr"></p>');
+let secret=Math.floor(Math.random()*100)+1;
+window.guess=()=>{let v=+document.getElementById("gv").value;document.getElementById("gr").innerText=v==secret?"Correct":(v<secret?"Low":"High");};
+
+add("Memory",'<h2>Memory</h2><p>Match pairs (simple demo)</p>');
+
+add("Snake",'<h2>Snake</h2><canvas id="snake" width="300" height="300"></canvas>');
+let sc=document.getElementById("snake"),sx=sc.getContext("2d"),sn=[{x:10,y:10}],fd={x:5,y:5},dx=1,dy=0;
+document.addEventListener("keydown",e=>{if(e.key=="ArrowUp"){dx=0;dy=-1}else if(e.key=="ArrowDown"){dx=0;dy=1}else if(e.key=="ArrowLeft"){dx=-1;dy=0}else if(e.key=="ArrowRight"){dx=1;dy=0}});
+setInterval(()=>{let h={x:sn[0].x+dx,y:sn[0].y+dy};sn.unshift(h);if(h.x==fd.x&&h.y==fd.y){fd={x:Math.floor(Math.random()*15),y:Math.floor(Math.random()*15)}}else sn.pop();sx.clearRect(0,0,300,300);sx.fillStyle="lime";sn.forEach(a=>sx.fillRect(a.x*20,a.y*20,18,18));sx.fillStyle="red";sx.fillRect(fd.x*20,fd.y*20,18,18);},120);
+
+add("Pong",'<h2>Pong</h2><canvas id="pong" width="400" height="200"></canvas>');
+let pc=document.getElementById("pong"),px=pc.getContext("2d"),bx=200,by=100,vx=3,vy=2;
+setInterval(()=>{bx+=vx;by+=vy;if(by<0||by>200)vy*=-1;if(bx<0||bx>400)vx*=-1;px.clearRect(0,0,400,200);px.fillRect(bx,by,10,10);},30);
+
+add("Breakout",'<h2>Breakout Demo</h2><canvas id="br" width="400" height="220"></canvas>');
+let br=document.getElementById("br"),bc=br.getContext("2d");
+setInterval(()=>{bc.clearRect(0,0,400,220);for(let i=0;i<8;i++)bc.strokeRect(i*50,20,45,20);},100);
+
+add("Whack",'<h2>Whack A Mole</h2><button onclick="mole()">Hit Mole</button><p id="mr">0</p>');
+let ms=0; window.mole=()=>{ms++;document.getElementById("mr").innerText=ms;};
+
+add("Reaction",'<h2>Reaction Test</h2><button id="rb">Wait...</button><p id="rr"></p>');
+let st; setTimeout(()=>{let b=document.getElementById("rb");b.innerText="CLICK";b.onclick=()=>document.getElementById("rr").innerText=(Date.now()-st)+" ms";st=Date.now();},3000);
+
+add("Dice",'<h2>Dice Roller</h2><button onclick="roll()">Roll</button><h3 id="dr">🎲</h3>');
+window.roll=()=>document.getElementById("dr").innerText=1+Math.floor(Math.random()*6);
+
+show("TicTacToe");
 </script>
-
 </body>
 </html>
