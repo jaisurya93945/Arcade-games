@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro Arcade</title>
+
+<style>
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+}
+
+h1{
+    background:#222;
+    margin:0;
+    padding:20px;
+}
+
+.menu{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    padding:20px;
+}
+
+button{
+    padding:10px 20px;
+    cursor:pointer;
+    border:none;
+    border-radius:8px;
+}
+
+.game{
+    display:none;
+    padding:20px;
+}
+
+.active{
+    display:block;
+}
+
+/* TicTacToe */
+.board{
+    width:300px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+}
+
+.cell{
+    width:100px;
+    height:100px;
+    border:1px solid white;
+    font-size:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+
+/* Memory */
+.memory-board{
+    display:grid;
+    grid-template-columns:repeat(4,80px);
+    gap:10px;
+    justify-content:center;
+}
+
+.card{
+    width:80px;
+    height:80px;
+    background:#444;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:30px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎮 Retro Arcade</h1>
+
+<div class="menu">
+<button onclick="showGame('tic')">Tic Tac Toe</button>
+<button onclick="showGame('rps')">Rock Paper Scissors</button>
+<button onclick="showGame('guess')">Guess Number</button>
+<button onclick="showGame('memory')">Memory Match</button>
+</div>
+
+<!-- TIC TAC TOE -->
+<div id="tic" class="game active">
+<h2>Tic Tac Toe</h2>
+
+<div class="board" id="board"></div>
+
+<p id="status"></p>
+<button onclick="resetTic()">Reset</button>
+</div>
+
+<!-- RPS -->
+<div id="rps" class="game">
+<h2>Rock Paper Scissors</h2>
+
+<button onclick="playRPS('Rock')">Rock</button>
+<button onclick="playRPS('Paper')">Paper</button>
+<button onclick="playRPS('Scissors')">Scissors</button>
+
+<p id="rpsResult"></p>
+</div>
+
+<!-- GUESS -->
+<div id="guess" class="game">
+<h2>Guess Number (1-100)</h2>
+
+<input id="guessInput" type="number">
+<button onclick="guessNumber()">Guess</button>
+
+<p id="guessResult"></p>
+</div>
+
+<!-- MEMORY -->
+<div id="memory" class="game">
+<h2>Memory Match</h2>
+
+<div class="memory-board" id="memoryBoard"></div>
+</div>
+
+<script>
+
+function showGame(id){
+document.querySelectorAll('.game')
+.forEach(g=>g.classList.remove('active'));
+
+document.getElementById(id)
+.classList.add('active');
+}
+
+/* TIC TAC TOE */
+
+let current='X';
+
+let boardState=['','','','','','','','',''];
+
+const wins=[
+[0,1,2],
+[3,4,5],
+[6,7,8],
+[0,3,6],
+[1,4,7],
+[2,5,8],
+[0,4,8],
+[2,4,6]
+];
+
+const board=document.getElementById('board');
+
+function renderBoard(){
+
+board.innerHTML='';
+
+boardState.forEach((cell,index)=>{
+
+const div=document.createElement('div');
+
+div.className='cell';
+
+div.innerText=cell;
+
+div.onclick=()=>move(index);
+
+board.appendChild(div);
+
+});
+}
+
+function move(i){
+
+if(boardState[i]) return;
+
+boardState[i]=current;
+
+for(let w of wins){
+
+let [a,b,c]=w;
+
+if(
+boardState[a] &&
+boardState[a]===boardState[b] &&
+boardState[a]===boardState[c]
+){
+document.getElementById('status')
+.innerText=current+" Wins!";
+renderBoard();
+return;
+}
+}
+
+current=current==='X'?'O':'X';
+
+renderBoard();
+}
+
+function resetTic(){
+
+boardState=['','','','','','','','',''];
+
+current='X';
+
+document.getElementById('status').innerText='';
+
+renderBoard();
+}
+
+renderBoard();
+
+/* RPS */
+
+function playRPS(player){
+
+const choices=['Rock','Paper','Scissors'];
+
+const cpu=
+choices[Math.floor(Math.random()*3)];
+
+let result='';
+
+if(player===cpu)
+result='Draw';
+
+else if(
+(player==='Rock'&&cpu==='Scissors')||
+(player==='Paper'&&cpu==='Rock')||
+(player==='Scissors'&&cpu==='Paper')
+)
+result='You Win';
+
+else
+result='CPU Wins';
+
+document.getElementById('rpsResult')
+.innerText=
+`You: ${player}
+CPU: ${cpu}
+${result}`;
+}
+
+/* GUESS */
+
+let secret=
+Math.floor(Math.random()*100)+1;
+
+function guessNumber(){
+
+let val=
+parseInt(
+document.getElementById('guessInput').value
+);
+
+if(val===secret)
+document.getElementById('guessResult')
+.innerText='Correct!';
+
+else if(val<secret)
+document.getElementById('guessResult')
+.innerText='Too Low';
+
+else
+document.getElementById('guessResult')
+.innerText='Too High';
+}
+
+/* MEMORY */
+
+const emojis=['🍎','🍎','🍌','🍌','🍇','🍇','🍉','🍉'];
+
+emojis.sort(()=>Math.random()-0.5);
+
+let first=null;
+let second=null;
+
+function createMemory(){
+
+const board=
+document.getElementById('memoryBoard');
+
+board.innerHTML='';
+
+emojis.forEach((emoji,index)=>{
+
+const card=
+document.createElement('div');
+
+card.className='card';
+
+card.dataset.value=emoji;
+
+card.innerText='?';
+
+card.onclick=()=>flip(card);
+
+board.appendChild(card);
+
+});
+}
+
+function flip(card){
+
+if(card.innerText!=='?') return;
+
+card.innerText=card.dataset.value;
+
+if(!first){
+first=card;
+return;
+}
+
+second=card;
+
+if(first.dataset.value!==second.dataset.value){
+
+setTimeout(()=>{
+first.innerText='?';
+second.innerText='?';
+first=null;
+second=null;
+},600);
+
+}else{
+
+first=null;
+second=null;
+}
+}
+
+createMemory();
+
+</script>
+
+</body>
+</html>
